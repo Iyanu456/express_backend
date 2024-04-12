@@ -3,6 +3,8 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const userRoutes = require('./routes/userRoutes');
 const protectedRoutes = require('./routes/protectedRoutes')
+const cors = require('cors');
+
 var livereload = require("livereload");
 var connectLiveReload = require("connect-livereload");
 
@@ -29,6 +31,12 @@ mongoose.connect((`${process.env.DATABASE_URI}`))
 
 
 // Routes
+
+app.use(cors({
+	origin: ['http://localhost:5173', 'https://resume-maker-cyan.vercel.app'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(userRoutes);
 app.use(protectedRoutes);
 
