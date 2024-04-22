@@ -6,7 +6,7 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"start": "node api/index.js",
-		"watch": "nodemon --ext *"
+		"dev": "nodemon --ext *"
 	},
 	"dependencies": {
 		"express": "^4.18.2",
@@ -16,7 +16,6 @@
     		"debug": "~2.6.9",
     		"dotenv": "^16.4.5",
     		"http-errors": "~1.6.3",
-    		"jade": "~1.11.0",
     		"jsonwebtoken": "^9.0.2",
     		"mongoose": "^8.3.1",
     		"morgan": "~1.9.1",
