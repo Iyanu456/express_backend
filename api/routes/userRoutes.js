@@ -43,7 +43,7 @@ router.post("/signup", async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
-        message: "Email already exists. Please use a different email.",
+        message: "email already exists",
         status: "failed",
       });
     }
@@ -54,7 +54,7 @@ router.post("/signup", async (req, res) => {
     await newUser.save();
 
      // Generate JWT token
-    const token = jwt.sign({ sub: user._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ sub: newUser._id }, process.env.JWT_SECRET, {
       expiresIn: "3h",
     });
 
@@ -95,7 +95,7 @@ router.post("/login", async (req, res) => {
     console.error("Error logging in:", error);
     res
       .status(500)
-      .json({ message: "Internal server error.", status: "failed" });
+      .json({ message: "Internal server error.", status: "failed", error: `${error}` });
   }
 });
 
