@@ -53,9 +53,15 @@ router.post("/signup", async (req, res) => {
     const newUser = new User({ email, password: hashedPassword });
     await newUser.save();
 
+     // Generate JWT token
+    const token = jwt.sign({ sub: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "3h",
+    });
+
     res.status(201).json({
       message: "User created successfully.",
       status: "success",
+      token: `${token}`,
     });
   } catch (error) {
     console.error("Error signing up:", error);
@@ -84,7 +90,7 @@ router.post("/login", async (req, res) => {
       expiresIn: "3h",
     });
 
-    res.status(200).json({ token: `${token}`, status: "success" });
+    res.status(200).json({ message: "login successful", token: `${token}`, status: "success" });
   } catch (error) {
     console.error("Error logging in:", error);
     res
