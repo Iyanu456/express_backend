@@ -67,7 +67,7 @@ router.post("/signup", async (req, res) => {
     console.error("Error signing up:", error);
     res
       .status(500)
-      .json({ message: "Internal server error.", status: "failed" });
+      .json({ message: "Internal server error.", status: "failed", error: `${error}` });
   }
 });
 
