@@ -99,4 +99,73 @@ router.post("/login", async (req, res) => {
   }
 });
 
+
+router.post("/templates", async (req, res) => {
+  const token = req.headers.authorization; // Assuming the token is included in the Authorization header
+  const { templateData } = req.body;
+
+  try {
+    // Decode the JWT token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Extract the user_id from the decoded token payload
+    const userId = decoded.sub;
+
+    // Now you have the user_id and can use it to perform operations
+
+    // For example, you can use the userId to find the user in the database
+    const user = await User.findById(userId);
+
+     // Check if the user exists
+     if (!user) {
+      return res.status(404).json({
+        message: "User not found.",
+        status: "failed",
+      });
+    }
+
+    // Create a new template object
+    const newTemplate = {
+      id: uuidv4(), // Generate a unique ID for the template
+      ...templateData,
+    };
+
+     // Add the new template to the user's list of templates
+     user.templates.push(newTemplate);
+
+     // Save the updated user document
+     await user.save();
+
+     res.status(201).json({
+      message: "Template created successfully.",
+      status: "success",
+      template: newTemplate,
+    });
+
+    // Continue with your logic...
+  } catch (error) {
+    console.error("Error decoding JWT token:", error);
+    res.status(401).json({
+      message: "Unauthorized",
+      status: "failed",
+      error: `${error}`,
+    });
+  }
+});
+
+// Route to fetch templates for a user
+router.get("/templates", auth, async (req, res) => {
+  try {
+    // Fetch templates based on the user ID from the request object
+    const templates = await Template.find({ user: req.user.id });
+    res.json(templates);
+  } catch (error) {
+    console.error("Error fetching templates:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+});
+
+
+
+
 module.exports = router;
