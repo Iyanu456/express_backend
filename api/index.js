@@ -11,6 +11,17 @@ var crypto = require('crypto');
 var path = require('path');
 
 
+//const multer = require('multer');
+//const { GridFsStorage } = require('multer-gridfs-storage');
+//const crypto = require('crypto');
+//const path = require('path');
+//const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const authMiddleware = require('./middlewares/authMiddleware');
+const User = require('./models/user');
+const Album = require('./models/album');
+
+
 const cors = require('cors');
 
 var livereload = require("livereload");
@@ -79,10 +90,34 @@ const upload = multer({
 });
 
 
-app.post("/upload", upload.single("file"), (req, res) => {
-  res.status(200)
-    .send("File uploaded successfully");
+app.post("/upload/image", upload.single("file"), (req, res) => {
+ 
+    res.status(201).json({
+      message: "File uploaded successfully",
+      status: "success",
+      ok: true,
+    });
 });
+
+
+app.post('/upload/images', authMiddleware, upload.array('files', 120), (req, res) => {
+
+  const { data } = req.body;
+  const parsedData = JSON.parse(data); 
+
+  const userId = parsedData.userId;
+  const albumName= parsedData.albumName;
+
+  res.status(201).json({
+    userId: userId,
+    albumName: albumName,
+    message: "File uploaded successfully",
+    files: req.files,
+    status: "success",
+    ok: true,
+  });
+});
+
 
 
 // Routes
