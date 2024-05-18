@@ -73,12 +73,13 @@ app.use(express.urlencoded({
 
 const storage = new GridFsStorage({
   url: process.env.DATABASE_URI,
+  options: { useNewUrlParser: true, useUnifiedTopology: true },
   file: (req, file) => {
     return new Promise((resolve, reject) => {
       const filename = file.originalname;
       const fileInfo = {
         filename: filename,
-        bucketName: "newBucket"
+        bucketName: "uploads"
       };
       resolve(fileInfo);
     });
@@ -100,7 +101,7 @@ app.post("/upload/image", upload.single("file"), (req, res) => {
 });
 
 
-app.post('/upload/images', authMiddleware, upload.array('files', 120), (req, res) => {
+app.post('/upload/images', authMiddleware, upload.array('files', 120), async (req, res) => {
 
   const { data } = req.body;
   const parsedData = JSON.parse(data); 
@@ -108,16 +109,70 @@ app.post('/upload/images', authMiddleware, upload.array('files', 120), (req, res
   const userId = parsedData.userId;
   const albumName= parsedData.albumName;
 
-  res.status(201).json({
-    userId: userId,
-    albumName: albumName,
-    message: "File uploaded successfully",
-    files: req.files,
-    status: "success",
-    ok: true,
-  });
+
+  try {
+    // Find user by userId
+    const user = await User.findOne({ user_id: userId });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if album already exists or create a new one
+    let album = await Album.findOne({ userId: user._id, name: albumName });
+    if (!album) {
+      album = new Album({
+        userId: user._id,
+        name: albumName,
+        uploadedImages: [],
+        pages: [
+          {
+            page: 1,
+            mainPreviewImages: [],
+            editedImages: [],
+            positionsData: [{ x: 0, y: 0 }],
+            zoomData: [1],
+            template: 'template 1',
+            visible: true,
+          },
+        ],
+      });
+    }
+
+    // Add image URLs to the album's mainPreviewImages and editedImages arrays
+    files.forEach((file) => {
+      const imageUrl = `https://express-backend-9bou.onrender.com/api/files/${file.filename}`;
+      //album.pages[0].mainPreviewImages.push(imageUrl);
+      //album.pages[0].editedImages.push(imageUrl);
+      album.uploadedImages.push(imageUrl);
+    });
+
+    // Save the updated album
+    await album.save();
+
+    // Add the album to the user's albums array if it's a new album
+    if (!user.albums.includes(album._id)) {
+      user.albums.push(album._id);
+      await user.save();
+    }
+
+    res.status(201).json({
+      userId: userId,
+      albumName: albumName,
+      albumId: album._id,
+      message: "File uploaded successfully",
+      files: req.files,
+      status: "success",
+      ok: true,
+    });
+  
+  
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error uploading files', error });
+  }
 });
 
+  
 
 
 // Routes
