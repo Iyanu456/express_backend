@@ -1,0 +1,133 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const Grid = require('gridfs-stream');
+const multer = require('multer');
+const { GridFsStorage } = require('multer-gridfs-storage');
+const jwt = require('jsonwebtoken');
+const authenticateToken = require('./middleware/authenticateToken'); // JWT middleware
+const User = require('./models/User');
+const Album = require('./models/Album');
+require('dotenv').config();
+
+const app = express();
+const port = process.env.PORT || 3011;
+
+// Middleware
+app.use(cors({
+  origin: ['http://localhost:5173', 'https://resume-maker-cyan.vercel.app'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+mongoose.connect(process.env.DATABASE_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('MongoDB Connected'))
+  .catch(err => console.error(err));
+
+// Initialize GridFS
+const conn = mongoose.connection;
+let gfs;
+conn.once('open', () => {
+  gfs = Grid(conn.db, mongoose.mongo);
+  gfs.collection('photos'); // Set collection name to 'photos'
+});
+
+// Create storage engine
+const storage = new GridFsStorage({
+  url: process.env.DATABASE_URI,
+  options: { useNewUrlParser: true, useUnifiedTopology: true },
+  file: (req, file) => {
+    if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
+      return {
+        bucketName: 'photos',
+        filename: `${Date.now()}_${file.originalname}`
+      };
+    } else {
+      return `${Date.now()}_${file.originalname}`;
+    }
+  }
+});
+
+const upload = multer({ storage });
+
+// Route to create an album and upload images
+app.post('/albums', authenticateToken, upload.array('photos', 100), async (req, res) => {
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).send('No files uploaded');
+  }
+
+  const userId = req.user.id;
+
+  try {
+    // Fetch user to get the number of albums they have
+    const user = await User.findById(userId).populate('albums');
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+
+    // Determine the next album number
+    const albumCount = user.albums.length;
+    const albumName = `Album ${albumCount + 1}`;
+
+    // Create a new album
+    const newAlbum = new Album({
+      userId: userId,
+      name: albumName,
+      uploadedImages: req.files.map(file => file.id.toString()),  // Store image IDs in uploadedImages array
+      pages: [],
+    });
+
+    const filesInfo = req.files.map(file => ({
+      id: file.id,
+      name: file.filename,
+      contentType: file.contentType,
+    }));
+
+    // Update album with the uploaded images
+    newAlbum.pages.push({
+      page: 1,
+      mainPreviewImages: filesInfo.map(file => file.id.toString()),
+      editedImages: [],
+      positionsData: [],
+      zoomData: [],
+      template: 'template 1',
+      visible: true,
+    });
+
+    await newAlbum.save();
+
+    // Update the user's albums
+    await User.findByIdAndUpdate(userId, { $push: { albums: newAlbum._id } });
+
+    res.send({
+      message: 'Album created and images uploaded successfully',
+      album: newAlbum,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal server error');
+  }
+});
+
+// Existing routes
+const userRoutes = require('./routes/userRoutes');
+const protectedRoutes = require('./routes/protectedRoutes');
+app.use('/users', userRoutes);
+app.use('/protected', protectedRoutes);
+
+app.get('/', (req, res) => {
+  res.send('Hello World!');
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something went wrong!' });
+});
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
