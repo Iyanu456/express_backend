@@ -153,18 +153,6 @@ router.post("/templates", async (req, res) => {
   }
 });
 
-// Route to fetch templates for a user
-router.get("/templates", auth, async (req, res) => {
-  try {
-    // Fetch templates based on the user ID from the request object
-    const templates = await Template.find({ user: req.user.id });
-    res.json(templates);
-  } catch (error) {
-    console.error("Error fetching templates:", error);
-    res.status(500).json({ message: "Internal server error." });
-  }
-});
-
 
 
 
