@@ -1,5 +1,8 @@
 // models/User.js
 const mongoose = require('mongoose');
+const Album = require('./album');
+
+
 const { v4: uuidv4 } = require('uuid');
 
 const userSchema = new mongoose.Schema({
@@ -17,7 +20,11 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true
-  }
+  },
+  albums: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Album' // Reference to the Album model
+  }]
 });
 
 const User = mongoose.model('User', userSchema);

@@ -1,8 +1,20 @@
 const express = require("express");
 const router = express.Router();
-const User = require("../models/user");
+
 const bcrypt = require("bcryptjs"); // Import bcrypt
 const jwt = require("jsonwebtoken");
+const auth = require('../middlewares/authMiddleware');
+
+const bodyParser = require('body-parser');
+const multer = require('multer');
+const { GridFsStorage } = require('multer-gridfs-storage');
+const crypto = require('crypto');
+const path = require('path');
+const User = require("../models/user");
+const Albums = require("../models/album");
+
+
+
 require("dotenv").config();
 
 // Define routes
@@ -44,6 +56,7 @@ router.post("/signup", async (req, res) => {
     if (existingUser) {
       return res.status(400).json({
         message: "email already exists",
+        ok: false,
         status: "failed",
       });
     }
@@ -61,6 +74,7 @@ router.post("/signup", async (req, res) => {
     res.status(201).json({
       message: "User created successfully.",
       status: "success",
+      ok: true,
       token: `${token}`,
     });
   } catch (error) {
@@ -87,10 +101,10 @@ router.post("/login", async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign({ sub: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "3h",
+      expiresIn: "1h",
     });
 
-    res.status(200).json({ message: "login successful", token: `${token}`, status: "success" });
+    res.status(200).json({ message: "login successful", ok: true, token: `${token}`, status: "success" });
   } catch (error) {
     console.error("Error logging in:", error);
     res
@@ -148,6 +162,7 @@ router.post("/templates", async (req, res) => {
     res.status(401).json({
       message: "Unauthorized",
       status: "failed",
+      ok: false,
       error: `${error}`,
     });
   }
