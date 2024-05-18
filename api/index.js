@@ -12,21 +12,24 @@ var path = require('path');
 
 
 const cors = require('cors');
-const Grid = require('gridfs-stream');
-const multer = require('multer');
-const { GridFsStorage } = require('multer-gridfs-storage');
-const jwt = require('jsonwebtoken');
-const authenticateToken = require('./middlewares/authMiddleware'); // JWT middleware
-const User = require('./models/user');
-const Album = require('./models/album');
+
+var livereload = require("livereload");
+var connectLiveReload = require("connect-livereload");
+
 require('dotenv').config();
 
-
+const liveReloadServer = livereload.createServer();
+liveReloadServer.server.once("connection", () => {
+  setTimeout(() => {
+    liveReloadServer.refresh("/");
+  }, 100);
+});
 
 const app = express();
-const port = process.env.PORT || 3011;
+app.use(connectLiveReload());
+const port = process.env.PORT || 3000;
 
-//app.use(bodyParser.urlencoded({ extended: false }));
+// Middleware
 app.use(bodyParser.json());
 
 app.use(cors({
@@ -93,12 +96,13 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-// Error handling middleware
+// Error handling middleware (placed at the end)
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
+// Start the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
