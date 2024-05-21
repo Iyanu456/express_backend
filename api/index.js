@@ -197,7 +197,7 @@ app.get('/album/:albumid', async (req, res) => {
   }
 });
 
-app.get('/user/:userId/albums', async (req, res) => {
+app.get('/albums/:userId', async (req, res) => {
   const { userId } = req.params;
 
   try {
