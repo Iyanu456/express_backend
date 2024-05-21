@@ -172,7 +172,30 @@ app.post('/local/upload', localUpload.array('files', 70), async (req, res) => {
   }
 });
 
-app.get('/');
+app.get('/album/:albumid', async (req, res) => {
+  const albumId = req.params.albumid;
+
+  try {
+    const album = await Album.findOne({ _id: albumId });
+
+    if (!album) {
+      return res.status(404).json({ message: 'Album not found' });
+    }
+
+    const uploadedImages = album.uploadedImages;
+
+    res.status(200).json({
+      albumId: album._id,
+      message: 'Images retrieved successfully',
+      imageUrls: uploadedImages,
+      status: 'success',
+      ok: true,
+    });
+  } catch (error) {
+    console.error('Error retrieving album:', error);
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
 
 app.post('/upload/image', upload.single('file'), (req, res) => {
   res.status(201).json({
