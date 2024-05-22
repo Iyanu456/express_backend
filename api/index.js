@@ -132,6 +132,7 @@ app.post('/local/upload', localUpload.array('files', 70), async (req, res) => {
     const newAlbum = new Album({
       userId: user._id,
       name: albumName,
+      albumId: newAlbum._id,
       uploadedImages: [],
       pages: [{
         page: 1,
