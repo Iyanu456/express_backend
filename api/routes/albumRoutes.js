@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const auth = require('../middlewares/authMiddleware');
 
 const User = require("../models/user");
-const Albums = require("../models/album");
+const Album = require("../models/album");
 
 require("dotenv").config();
 
