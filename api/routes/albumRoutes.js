@@ -31,7 +31,7 @@ router.get('/album/:albumid', async (req, res) => {
       });
     } catch (error) {
       console.error('Error retrieving album:', error);
-      res.status(500).json({ error: `error` });
+      res.status(500).json({ error: `${error}` });
     }
   });
 
