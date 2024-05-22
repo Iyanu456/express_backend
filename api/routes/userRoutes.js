@@ -68,7 +68,7 @@ router.post("/signup", async (req, res) => {
 
      // Generate JWT token
     const token = jwt.sign({ sub: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: "3h",
+      expiresIn: "88h",
     });
 
     res.status(201).json({
@@ -101,7 +101,7 @@ router.post("/login", async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign({ sub: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "88h",
     });
 
     res.status(200).json({ message: "login successful", ok: true, token: `${token}`, status: "success" });
