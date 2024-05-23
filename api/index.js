@@ -2,7 +2,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const userRoutes = require('./routes/userRoutes');
-const albumRoutes = require('./routes/albumRoutes')
 const protectedRoutes = require('./routes/protectedRoutes');
 const multer = require('multer');
 const { GridFsStorage } = require('multer-gridfs-storage');
@@ -132,7 +131,6 @@ app.post('/local/upload', localUpload.array('files', 70), async (req, res) => {
     const newAlbum = new Album({
       userId: user._id,
       name: albumName,
-      albumId: newAlbum._id,
       uploadedImages: [],
       pages: [{
         page: 1,
@@ -174,6 +172,7 @@ app.post('/local/upload', localUpload.array('files', 70), async (req, res) => {
   }
 });
 
+app.get('/');
 
 app.post('/upload/image', upload.single('file'), (req, res) => {
   res.status(201).json({
@@ -219,7 +218,6 @@ app.get('/fileinfo/:filename', (req, res) => {
 
 app.use(userRoutes);
 app.use(protectedRoutes);
-app.use(albumRoutes)
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
