@@ -161,7 +161,7 @@ app.post('/local/upload', localUpload.array('files', 70), async (req, res) => {
     res.status(201).json({
       userId: userId,
       albumName: albumName,
-      albumId: newAlbum._id
+      albumId: newAlbum._id,
       message: 'Files uploaded successfully',
       files: req.files,
       status: 'success',
