@@ -26,9 +26,6 @@ liveReloadServer.server.once('connection', () => {
 });
 
 const app = express();
-app.use(express.static('public'));
-app.use(connectLiveReload());
-const port = process.env.PORT || 3001;
 
 // Middleware
 app.use(bodyParser.json());
@@ -37,6 +34,17 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+app.use(connectLiveReload());
+const port = process.env.PORT || 3001;
+
+
+
+app.options('*', cors());  // Preflight request handling
+
+app.use(express.static('public'));
+
+
 
 // db.js
 mongoose.connect(process.env.DATABASE_URI)
