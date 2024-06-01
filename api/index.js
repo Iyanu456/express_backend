@@ -195,18 +195,18 @@ app.post('/local/upload', localUpload.array('files', 70), async (req, res) => {
 });
 
 app.get('/local/update/:albumId', localUpload.array('files', 70), async (req, res) => {
-  //const authHeader = req.headers['authorization'];
+  const authHeader = req.headers['authorization'];
 
-  //if (!authHeader) {
-  //  return res.status(401).json({ error: 'Authorization header is missing' });
-  //}
+  if (!authHeader) {
+    return res.status(401).json({ error: 'Authorization header is missing' });
+  }
 
   // Extract the token from the Authorization header
-  //const token = authHeader.split(' ')[1];
+  const token = authHeader.split(' ')[1];
 
-  //if (!token) {
-  //  return res.status(401).json({ error: 'Token is missing' });
-  //}
+  if (!token) {
+    return res.status(401).json({ error: 'Token is missing' });
+  }
 
   console.log('Received /local/update request');
   console.log('Request body:', req.body);
