@@ -120,18 +120,16 @@ app.post('/local/upload', localUpload.array('files', 70), async (req, res) => {
   console.log('Request body:', req.body);
   console.log('Uploaded files:', req.files);
 
-  const { userId, albumName } = req.body;
+  const { albumName } = req.body;
 
-  if (!userId || !albumName) {
-    console.log('Missing userId or albumName');
+  if (!albumName) {
+    console.log('Missing albumName');
     return res.status(400).json({ error: 'albumName is required' });
   }
 
   try {
-    // Find the user by userId
+    // Verify the token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // Extract user information from the decoded token
     const userId = decoded.sub;
 
     console.log('Searching for user with userId:', userId);
@@ -141,11 +139,19 @@ app.post('/local/upload', localUpload.array('files', 70), async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    // Generate a unique album name if one already exists with the same name
+    let uniqueAlbumName = albumName;
+    let albumCount = 1;
+
+    while (await Album.findOne({ userId: user._id, name: uniqueAlbumName })) {
+      uniqueAlbumName = `${albumName}-${++albumCount}`;
+    }
+
     // Create a new album
     console.log('Creating new album for user:', user._id);
     const newAlbum = new Album({
       userId: user._id,
-      name: albumName,
+      name: uniqueAlbumName,
       uploadedImages: [],
       pages: [{
         page: 1,
@@ -175,7 +181,7 @@ app.post('/local/upload', localUpload.array('files', 70), async (req, res) => {
 
     res.status(201).json({
       userId: userId,
-      albumName: albumName,
+      albumName: uniqueAlbumName,
       albumId: newAlbum._id,
       message: 'Files uploaded successfully',
       files: req.files,
