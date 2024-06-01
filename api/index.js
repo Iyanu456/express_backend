@@ -17,12 +17,12 @@ const connectLiveReload = require('connect-livereload');
 const fs = require('fs'); // Import fs module
 require('dotenv').config();
 
-const liveReloadServer = livereload.createServer();
-liveReloadServer.server.once('connection', () => {
-  setTimeout(() => {
-    liveReloadServer.refresh('/');
-  }, 5000);
-});
+//const liveReloadServer = livereload.createServer();
+//liveReloadServer.server.once('connection', () => {
+//  setTimeout(() => {
+//    liveReloadServer.refresh('/');
+//  }, 5000);
+//});
 
 const app = express();
 
@@ -42,6 +42,7 @@ const port = process.env.PORT || 3001;
 app.options('*', cors());  // Preflight request handling
 const root = require('path').join(__dirname, 'public');
 app.use(express.static(root));
+app.use('/images', express.static(path.join(__dirname, '../public/images')));
 
 //app.use('/*', (req, res) => {
 	//res.sendFile(path.join(__dirname, 'public', 'index.html')
@@ -159,7 +160,7 @@ app.post('/local/upload', localUpload.array('files', 70), async (req, res) => {
 
     // Store URLs of the uploaded images in the uploadedImages array
     req.files.forEach((file) => {
-      const imageUrl = `https://express-backend-9bou.onrender.com/images/${file.filename}`;
+      const imageUrl = `http://185.164.111.38/images/${file.filename}`;
       newAlbum.uploadedImages.push(imageUrl);
     });
 
