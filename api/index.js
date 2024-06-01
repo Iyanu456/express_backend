@@ -29,7 +29,7 @@ const app = express();
 // Middleware
 app.use(bodyParser.json());
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://resume-maker-cyan.vercel.app', 'https://album-maker.vercel.app'],
+  origin: ['http://185.164.111.38', 'http://localhost:5173', 'https://resume-maker-cyan.vercel.app', 'https://album-maker.vercel.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
@@ -40,10 +40,16 @@ const port = process.env.PORT || 3001;
 
 
 app.options('*', cors());  // Preflight request handling
+const root = require('path').join(__dirname, 'public');
+app.use(express.static(root));
 
-app.use(express.static('public'));
+//app.use('/*', (req, res) => {
+	//res.sendFile(path.join(__dirname, 'public', 'index.html')
+	//)})
 
-
+// Increase the payload limit
+app.use(bodyParser.json({ limit: '250mb' }));
+app.use(bodyParser.urlencoded({ limit: '250mb', extended: true }));
 
 // db.js
 mongoose.connect(process.env.DATABASE_URI)
@@ -181,7 +187,7 @@ app.post('/local/upload', localUpload.array('files', 70), async (req, res) => {
   }
 });
 
-app.get('/');
+//app.get('/');
 
 app.post('/upload/image', upload.single('file'), (req, res) => {
   res.status(201).json({
@@ -283,12 +289,16 @@ app.get('/fileinfo/:filename', (req, res) => {
   });
 });
 
-app.use(userRoutes);
-app.use(protectedRoutes);
+app.use('/api', userRoutes);
+app.use('/api', protectedRoutes);
 
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.send('Hello World!');
 });
+
+app.use('/*', (req, res) => {
+        res.sendFile(path.join(__dirname, 'public', 'index.html')
+        )})
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -299,4 +309,4 @@ const server = app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 
-server.setTimeout(600000);
+server.setTimeout(800000);

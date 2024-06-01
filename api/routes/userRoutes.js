@@ -18,11 +18,11 @@ const Albums = require("../models/album");
 require("dotenv").config();
 
 // Define routes
-router.get("/test1", (req, res) => {
+router.get("/api/test1", (req, res) => {
   res.send("Hello World! This is the first route");
 });
 
-router.get("/test2", (req, res) => {
+router.get("/api/test2", (req, res) => {
   res.send("Hello World! This is the second route");
 });
 
