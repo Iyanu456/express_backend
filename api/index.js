@@ -194,7 +194,7 @@ app.post('/local/upload', localUpload.array('files', 70), async (req, res) => {
   }
 });
 
-app.get('/local/update/:albumId', localUpload.array('files', 70), async (req, res) => {
+app.post('/local/update/:albumId', localUpload.array('files', 70), async (req, res) => {
   const authHeader = req.headers['authorization'];
 
   if (!authHeader) {
