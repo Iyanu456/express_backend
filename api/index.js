@@ -144,7 +144,7 @@ app.post('/local/upload', localUpload.array('files', 70), async (req, res) => {
     let albumCount = 1;
 
     while (await Album.findOne({ userId: user._id, name: uniqueAlbumName })) {
-      uniqueAlbumName = `${albumName}-${++albumCount}`;
+      uniqueAlbumName = `${albumName} (${++albumCount})`;
     }
 
     // Create a new album
