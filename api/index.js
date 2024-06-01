@@ -194,7 +194,78 @@ app.post('/local/upload', localUpload.array('files', 70), async (req, res) => {
   }
 });
 
-//app.get('/');
+app.get('/local/update/:albumId', localUpload.array('files', 70), async (req, res) => {
+  //const authHeader = req.headers['authorization'];
+
+  //if (!authHeader) {
+  //  return res.status(401).json({ error: 'Authorization header is missing' });
+  //}
+
+  // Extract the token from the Authorization header
+  //const token = authHeader.split(' ')[1];
+
+  //if (!token) {
+  //  return res.status(401).json({ error: 'Token is missing' });
+  //}
+
+  console.log('Received /local/update request');
+  console.log('Request body:', req.body);
+  console.log('Uploaded files:', req.files);
+
+  const { albumId } = req.params;
+
+  if (!albumId) {
+    console.log('Missing albumId');
+    return res.status(400).json({ error: 'albumId is required' });
+  }
+
+  try {
+    // Verify the token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.sub;
+
+    console.log('Searching for user with userId:', userId);
+    const user = await User.findOne({ _id: userId });
+    if (!user) {
+      console.log('User not found');
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Find the album by albumId
+    console.log('Searching for album with id:', albumId);
+    const album = await Album.findOne({ _id: albumId, userId: user._id });
+
+    if (!album) {
+      console.log('Album not found');
+      return res.status(404).json({ message: 'Album not found' });
+    }
+
+    // Store URLs of the uploaded images in the uploadedImages array
+    req.files.forEach((file) => {
+      const imageUrl = `http://185.164.111.38/images/${file.filename}`;
+      album.uploadedImages.push(imageUrl);
+    });
+
+    // Save the updated album to the database
+    console.log('Saving updated album to the database');
+    await album.save();
+
+    res.status(200).json({
+      userId: userId,
+      albumName: album.name,
+      albumId: album._id,
+      message: 'Files uploaded successfully',
+      files: req.files,
+      status: 'success',
+      ok: true,
+    });
+  } catch (error) {
+    console.error('Error occurred:', error);
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+//app.get('/'); 
 
 app.post('/upload/image', upload.single('file'), (req, res) => {
   res.status(201).json({
