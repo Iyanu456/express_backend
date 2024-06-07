@@ -1,8 +1,6 @@
 // models/User.js
 const mongoose = require('mongoose');
 const Album = require('./album');
-
-
 const { v4: uuidv4 } = require('uuid');
 
 const userSchema = new mongoose.Schema({
@@ -21,6 +19,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  role: {
+    type: String,
+    enum: ['guest', 'admin'], // Specify allowed values
+    default: 'guest' // Default value is 'guest'
+  },
   albums: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Album' // Reference to the Album model
@@ -30,4 +33,3 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
-

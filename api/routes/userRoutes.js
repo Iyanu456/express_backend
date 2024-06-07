@@ -36,7 +36,7 @@ router.post("/signup", async (req, res) => {
     });
   }
 
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
 
   if (!email) {
     return res
@@ -63,7 +63,7 @@ router.post("/signup", async (req, res) => {
 
     // If email doesn't exist, create a new user
     const hashedPassword = bcrypt.hashSync(password, 10);
-    const newUser = new User({ email, password: hashedPassword });
+    const newUser = new User({ email, password: hashedPassword, role });
     await newUser.save();
 
      // Generate JWT token
