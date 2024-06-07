@@ -305,6 +305,7 @@ app.get('/album/:albumid', async (req, res) => {
       const uploadedImages = album.uploadedImages;
   
       res.status(200).json({
+        email: user.email,
         role: user.role,
         albumId: album._id,
         message: 'Images retrieved successfully',
@@ -340,6 +341,7 @@ app.get('/album/:albumid', async (req, res) => {
   
       // Return the list of albums
       res.status(200).json({
+        email: user.email,
         role: user.role,
         userId: userId,
         albums: albumList,
