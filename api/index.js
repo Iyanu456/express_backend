@@ -296,6 +296,7 @@ app.get('/album/:albumid', async (req, res) => {
   
     try {
       const album = await Album.findOne({ _id: albumId });
+      const user = await User.findOne({ _id: album.userId});
   
       if (!album) {
         return res.status(404).json({ message: 'Album not found' });
@@ -304,7 +305,7 @@ app.get('/album/:albumid', async (req, res) => {
       const uploadedImages = album.uploadedImages;
   
       res.status(200).json({
-        role: album.userId,
+        role: user.role,
         albumId: album._id,
         message: 'Images retrieved successfully',
         imageUrls: uploadedImages,
