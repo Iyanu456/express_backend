@@ -166,7 +166,7 @@ app.post('/local/upload', localUpload.array('files', 70), async (req, res) => {
 
     // Store URLs of the uploaded images in the uploadedImages array
     req.files.forEach((file) => {
-      const imageUrl = `http://185.164.111.38/images/${file.filename}`;
+      const imageUrl = `https://legacyvideobooks.io/images/${file.filename}`;
       newAlbum.uploadedImages.push(imageUrl);
     });
 
@@ -242,7 +242,7 @@ app.post('/local/update/:albumId', localUpload.array('files', 70), async (req, r
 
     // Store URLs of the uploaded images in the uploadedImages array
     req.files.forEach((file) => {
-      const imageUrl = `http://185.164.111.38/images/${file.filename}`;
+      const imageUrl = `https://legacyvideobooks.io/images/${file.filename}`;
       album.uploadedImages.push(imageUrl);
     });
 
