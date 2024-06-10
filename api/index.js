@@ -120,7 +120,7 @@ app.post('/local/upload', localUpload.array('files', 70), async (req, res) => {
   console.log('Request body:', req.body);
   console.log('Uploaded files:', req.files);
 
-  const { albumName, caption, yearsAlive, nameOfPerson } = req.body;
+  const { albumName, yearsAlive, fullNameOfPerson } = req.body;
 
   if (!albumName) {
     console.log('Missing albumName');
@@ -152,9 +152,8 @@ app.post('/local/upload', localUpload.array('files', 70), async (req, res) => {
     const newAlbum = new Album({
       userId: user._id,
       name: uniqueAlbumName,
-      caption: caption,
       yearsAlive: yearsAlive,
-      nameOfPerson: nameOfPerson, 
+      fullNameOfPerson: fullNameOfPerson, 
       uploadedImages: [],
       pages: [{
         page: 1,
@@ -311,6 +310,8 @@ app.get('/album/:albumid', async (req, res) => {
         email: user.email,
         role: user.role,
         albumId: album._id,
+        yearsAlive: album.yearsAlive,
+        fullNameOfPerson: album.fullNameOfPerson,
         message: 'Images retrieved successfully',
         imageUrls: uploadedImages,
         status: 'success',

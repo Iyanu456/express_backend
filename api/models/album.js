@@ -12,15 +12,11 @@ const AlbumSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  caption: {
-    type: String,
-    required: true,
-  },
   yearsAlive: {
     type: String,
     required: true,
   },
-  nameOfPerson: {
+  fullNameOfPerson: {
     type: String,
     required: true,
   },
