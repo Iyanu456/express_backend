@@ -12,6 +12,18 @@ const AlbumSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  caption: {
+    type: String,
+    required: true,
+  },
+  yearsAlive: {
+    type: String,
+    required: true,
+  },
+  nameOfPerson: {
+    type: String,
+    required: true,
+  },
   uploadedImages: [String],
   pages: [
     {
