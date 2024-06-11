@@ -267,6 +267,37 @@ app.post('/local/update/:albumId', localUpload.array('files', 70), async (req, r
   }
 });
 
+app.put('/update/captions', async (req, res) => {
+  const authHeader = req.headers['authorization'];
+
+  if (!authHeader) {
+    return res.status(401).json({ error: 'Authorization header is missing' });
+  }
+
+  const { albumId, fullNameOfPerson, yearsAlive } = req.body;
+
+  if (!albumId || !fullNameOfPerson) {
+    return res.status(400).send('Album ID and full name are required.');
+  }
+
+  try {
+    const album = await Album.findByIdAndUpdate(
+      albumId,
+      { fullNameOfPerson, yearsAlive },
+      { new: true }
+    );
+
+    if (!album) {
+      return res.status(404).send('Album not found.');
+    }
+
+    res.status(200).send(album);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('An error occurred while updating the album.');
+  }
+});
+
 //app.get('/'); 
 
 app.post('/upload/image', upload.single('file'), (req, res) => {
