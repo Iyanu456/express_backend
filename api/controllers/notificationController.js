@@ -20,7 +20,7 @@ exports.sendNotification = async (req, res) => {
 
     await Notification.insertMany(notifications);
 
-    res.status(201).json({ message: 'Notification sent to all admins successfully' });
+    res.status(201).json({ message: 'Album sent to admin successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
