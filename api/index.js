@@ -414,7 +414,7 @@ app.get('/fileinfo/:filename', (req, res) => {
 
 app.use('/api', userRoutes);
 app.use('/api', protectedRoutes);
-app.use('/api/notifications', notificationRoutes);
+app.use('/notifications', notificationRoutes);
 
 app.get('/api', (req, res) => {
   res.send('Hello World!');
