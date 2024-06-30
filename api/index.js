@@ -1,8 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const userRoutes = require('./routes/userRoutes');
-const protectedRoutes = require('./routes/protectedRoutes');
 const multer = require('multer');
 const { GridFsStorage } = require('multer-gridfs-storage');
 const crypto = require('crypto');
@@ -15,6 +13,13 @@ const Album = require('./models/album');
 const livereload = require('livereload');
 const connectLiveReload = require('connect-livereload');
 const fs = require('fs'); // Import fs module
+
+//routes
+const userRoutes = require('./routes/userRoutes');
+const protectedRoutes = require('./routes/protectedRoutes');
+const notificationRoutes = require('./routes/notifications');
+
+
 require('dotenv').config();
 
 //const liveReloadServer = livereload.createServer();
@@ -409,6 +414,7 @@ app.get('/fileinfo/:filename', (req, res) => {
 
 app.use('/api', userRoutes);
 app.use('/api', protectedRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.get('/api', (req, res) => {
   res.send('Hello World!');
