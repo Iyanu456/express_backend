@@ -13,7 +13,7 @@ router.get('/api/role', async (req, res) => {
     return res.status(401).json({ error: 'Authorization header is missing' });
   }
 
-  const { userId } = req.params;
+  const { userId } = req.body;
 
   try {
     // The authenticated user is available in req.user
