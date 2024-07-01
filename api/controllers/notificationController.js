@@ -1,4 +1,3 @@
-// controllers/notificationController.js
 const Notification = require('../models/notifications');
 const User = require('../models/user');
 const Album = require('../models/album');
@@ -6,19 +5,36 @@ const Album = require('../models/album');
 exports.sendNotification = async (req, res) => {
   try {
     const { albumId } = req.body;
-    const guestUserId = req.user.id;
+
+    // Retrieve the album to get the guestUserId
+    const album = await Album.findById(albumId);
+    if (!album) {
+      return res.status(404).json({ error: 'Album not found' });
+    }
+
+    const guestUserId = album.userId;
 
     // Find all admin users
     const admins = await User.find({ role: 'admin' });
 
-    // Create a notification for each admin user
-    const notifications = admins.map(admin => ({
-      album: albumId,
-      guestUser: guestUserId,
-      adminUser: admin._id,
-    }));
+    // Check if a notification already exists for each admin user
+    for (const admin of admins) {
+      const existingNotification = await Notification.findOne({
+        album: albumId,
+        guestUser: guestUserId,
+        adminUser: admin._id,
+      });
 
-    await Notification.insertMany(notifications);
+      if (!existingNotification) {
+        const notification = new Notification({
+          album: albumId,
+          guestUser: guestUserId,
+          adminUser: admin._id,
+        });
+
+        await notification.save();
+      }
+    }
 
     res.status(201).json({ message: 'Album sent to admin successfully' });
   } catch (err) {

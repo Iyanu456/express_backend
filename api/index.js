@@ -18,7 +18,7 @@ const fs = require('fs'); // Import fs module
 const userRoutes = require('./routes/userRoutes');
 const protectedRoutes = require('./routes/protectedRoutes');
 const notificationRoutes = require('./routes/notifications');
-
+const roleRoute = require('./routes/role');
 
 require('dotenv').config();
 
@@ -415,6 +415,7 @@ app.get('/fileinfo/:filename', (req, res) => {
 app.use('/api', userRoutes);
 app.use('/api', protectedRoutes);
 app.use('/notifications', notificationRoutes);
+app.use(roleRoute);
 
 app.get('/api', (req, res) => {
   res.send('Hello World!');
