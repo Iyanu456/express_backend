@@ -5,7 +5,7 @@ const User = require('../models/user'); // Adjust the path to your User model
 const router = express.Router();
 
 // Route to get the user role
-router.get('/api/role', async (req, res) => {
+router.get('/api/role', auth, async (req, res) => {
     
     const authHeader = req.headers['authorization'];
 
@@ -13,13 +13,15 @@ router.get('/api/role', async (req, res) => {
     return res.status(401).json({ error: 'Authorization header is missing' });
   }
 
-  const { userId } = req.body;
+  // The authenticated user is available in req.user
+  const user = req.user;
+  //const { userId } = req.body;
 
   try {
     // The authenticated user is available in req.user
     
 
-    const user = await User.findOne({ _id: userId});
+    //const user = await User.findOne({ _id: userId});
 
 
     if (!user) {
