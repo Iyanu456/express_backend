@@ -1,14 +1,26 @@
 const express = require('express');
-const { authenticate } = require('../middlewares/authMiddleware');
+const auth = require('../middlewares/authMiddleware');
 const User = require('../models/user'); // Adjust the path to your User model
 
 const router = express.Router();
 
 // Route to get the user role
-router.get('/api/role', authenticate, async (req, res) => {
+router.get('/api/role', async (req, res) => {
+    
+    const authHeader = req.headers['authorization'];
+
+  if (!authHeader) {
+    return res.status(401).json({ error: 'Authorization header is missing' });
+  }
+
+  const { userId } = req.params;
+
   try {
     // The authenticated user is available in req.user
-    const user = req.user;
+    
+
+    const user = await User.findOne({ _id: userId});
+
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
