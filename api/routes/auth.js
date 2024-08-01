@@ -1,15 +1,17 @@
 // routes/auth.js
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
+const User = require('../models/user');
 const nodemailer = require('nodemailer');
+const bcrypt = require("bcryptjs");
 const crypto = require('crypto');
 
 // Generate and send OTP
 router.post('/send-otp', async (req, res) => {
   const { email } = req.body;
-  const otp = crypto.randomBytes(3).toString('hex'); // Generate a random 6-digit OTP
-  const otpExpires = Date.now() + 10 * 60 * 1000; // OTP expires in 10 minutes
+  //const otp = crypto.randomBytes(3).toString('hex'); // Generate a random 6-digit OTP
+  const otp = crypto.randomInt(100000, 999999);
+  const otpExpires = Date.now() + 5 * 60 * 1000; // OTP expires in 10 minutes
 
   try {
     const user = await User.findOneAndUpdate(
@@ -50,7 +52,7 @@ router.post('/send-otp', async (req, res) => {
     const mailOptions = {
       from: 'legacyvideobooks@legacyvideobooks.io',
       to: email,
-      subject: 'Your OTP Code',
+      subject: `Your secure OTP is ${otp}`,
       text: `Your secure OTP is ${otp}`,
       html: `Use the following OTP - <b>${otp}</b> to complete your Password Reset`
     };
@@ -89,7 +91,38 @@ router.post('/verify-otp', async (req, res) => {
     }
   });
   
-  module.exports = router;
+
+  router.post('/reset-password', async (req, res) => {
+    const { email, otp, newPassword } = req.body;
+  
+    try {
+      // Find the user by email
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      // Check if OTP is valid and not expired
+      if (user.otp !== otp || user.otpExpires < Date.now()) {
+        return res.status(400).json({ message: 'Invalid or expired OTP' });
+      }
+  
+      // Hash the new password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+  
+      // Update the user's password and invalidate the OTP
+      user.password = hashedPassword;
+      user.otp = undefined;
+      user.otpExpires = undefined;
+      await user.save();
+  
+      res.status(200).json({ message: 'Password reset successfully' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
   
 
 
