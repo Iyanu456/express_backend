@@ -13,6 +13,7 @@ const Album = require('./models/album');
 const livereload = require('livereload');
 const connectLiveReload = require('connect-livereload');
 const fs = require('fs'); // Import fs module
+const authRoutes = require('./routes/auth');
 
 //routes
 const userRoutes = require('./routes/userRoutes');
@@ -415,6 +416,7 @@ app.get('/fileinfo/:filename', (req, res) => {
 app.use('/api', userRoutes);
 app.use('/api', protectedRoutes);
 app.use('/notifications', notificationRoutes);
+app.use('/api', authRoutes);
 app.use(roleRoute);
 
 app.get('/api', (req, res) => {

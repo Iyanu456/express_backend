@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 const userSchema = new mongoose.Schema({
   user_id: {
     type: String,
-    default: uuidv4, // Use uuidv4 to generate default value
+    default: uuidv4,
     required: true,
     unique: true
   },
@@ -21,15 +21,23 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['guest', 'admin'], // Specify allowed values
-    default: 'guest' // Default value is 'guest'
+    enum: ['guest', 'admin'],
+    default: 'guest'
   },
   albums: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Album' // Reference to the Album model
-  }]
+    ref: 'Album'
+  }],
+  otp: {
+    type: String,
+    required: false
+  },
+  otpExpires: {
+    type: Date,
+    required: false
+  }
 });
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.models.User || mongoose.model('User', userSchema);
 
 module.exports = User;
