@@ -104,7 +104,7 @@ router.post('/verify-otp', async (req, res) => {
   
       // Check if OTP is valid and not expired
       if (user.otp !== otp || user.otpExpires < Date.now()) {
-        return res.status(400).json({ message: 'Invalid or expired OTP' });
+        return res.status(400).json({ message: 'Session timeout, please refresh the page', success: false });
       }
   
       // Hash the new password
@@ -117,7 +117,7 @@ router.post('/verify-otp', async (req, res) => {
       user.otpExpires = undefined;
       await user.save();
   
-      res.status(200).json({ message: 'Password reset successfully' });
+      res.status(200).json({ message: 'Password reset successfully', success: true });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Internal server error' });
