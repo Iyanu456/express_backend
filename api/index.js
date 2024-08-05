@@ -20,6 +20,7 @@ const userRoutes = require('./routes/userRoutes');
 const protectedRoutes = require('./routes/protectedRoutes');
 const notificationRoutes = require('./routes/notifications');
 const roleRoute = require('./routes/role');
+const adminRoutes = require('./routes/adminRoutes'); // Add this line
 
 require('dotenv').config();
 
@@ -417,6 +418,7 @@ app.use('/api', userRoutes);
 app.use('/api', protectedRoutes);
 app.use('/notifications', notificationRoutes);
 app.use('/api', authRoutes);
+app.use('/api', adminRoutes); // Add this line
 app.use(roleRoute);
 
 app.get('/api', (req, res) => {
