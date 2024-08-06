@@ -46,3 +46,12 @@ exports.getAllGuests = async (req, res) => {
       res.status(500).json({ msg: 'Error updating user role', error });
     }
   };
+
+  exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select('-password'); // Exclude the password field
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ msg: 'Error fetching users', error });
+  }
+};
