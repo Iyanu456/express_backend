@@ -15,6 +15,7 @@ router.get('/album/:albumid', async (req, res) => {
   
     try {
       const album = await Album.findOne({ _id: albumId });
+      const user = await User.findOne({ _id: album.userId});
   
       if (!album) {
         return res.status(404).json({ message: 'Album not found' });
@@ -23,7 +24,11 @@ router.get('/album/:albumid', async (req, res) => {
       const uploadedImages = album.uploadedImages;
   
       res.status(200).json({
+        email: user.email,
+        role: user.role,
         albumId: album._id,
+        yearsAlive: album.yearsAlive,
+        fullNameOfPerson: album.fullNameOfPerson,
         message: 'Images retrieved successfully',
         imageUrls: uploadedImages,
         status: 'success',
@@ -37,8 +42,7 @@ router.get('/album/:albumid', async (req, res) => {
 
 
 
-
-  router.get('/albums/:userId', async (req, res) => {
+   router.get('/albums/:userId', async (req, res) => {
     const { userId } = req.params;
   
     try {
@@ -57,6 +61,8 @@ router.get('/album/:albumid', async (req, res) => {
   
       // Return the list of albums
       res.status(200).json({
+        email: user.email,
+        role: user.role,
         userId: userId,
         albums: albumList,
         status: 'success',
