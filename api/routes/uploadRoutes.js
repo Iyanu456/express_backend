@@ -34,6 +34,7 @@ const localStorage = multer.diskStorage({
 
 
 const upload = multer({ storage: localStorage });
+const baseUrl = process.env.IMAGE_BASE_URL;
 
 // HEIC to JPEG conversion function
 async function heicToJpeg(inputPath, outputPath) {
@@ -114,7 +115,7 @@ router.post('/upload', upload.array('files', 70), async (req, res) => {
         finalFilePath = outputPath;
       }
 
-      const imageUrl = `http://localhost:3001/images/${path.basename(finalFilePath)}`;
+      const imageUrl = `${baseUrl}/images/${path.basename(finalFilePath)}`;
       newAlbum.uploadedImages.push(imageUrl);
     }
 
@@ -188,7 +189,7 @@ router.post('/update/:albumId', upload.array('files', 70), async (req, res) => {
 
     // Store URLs of the uploaded images in the uploadedImages array
     req.files.forEach((file) => {
-      const imageUrl = `https://legacyvideobooks.io/images/${file.filename}`;
+      const imageUrl = `${baseUrl}/images/${file.filename}`;
       album.uploadedImages.push(imageUrl);
     });
 
