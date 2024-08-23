@@ -22,6 +22,7 @@ const roleRoutes = require('./routes/role');
 const adminRoutes = require('./routes/adminRoutes');
 const captionRoutes = require ('./routes/captionRoute');
 const albumRoutes = require('./routes/albumRoutes');
+const videoRoutes = require('./routes/videoRoutes');
 
 
 
@@ -66,6 +67,7 @@ const root = require('path').join(__dirname, 'public');
 
 app.use(express.static(root));
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
+app.use('/video-uploads', express.static(path.join(__dirname, '../public/video-uploads')));
 app.use(bodyParser.json({ limit: '250mb' }));
 app.use(bodyParser.urlencoded({ limit: '250mb', extended: true }));
 
@@ -88,6 +90,7 @@ app.use('/api', adminRoutes);
 app.use(roleRoutes);
 app.use(captionRoutes);
 app.use(albumRoutes);
+app.use('/api', videoRoutes);
 
 
 app.use('/*', (req, res) => {

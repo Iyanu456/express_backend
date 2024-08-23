@@ -21,6 +21,10 @@ const AlbumSchema = new mongoose.Schema({
     required: true,
   },
   uploadedImages: [String],
+  uploadedVideo: {
+    type: String,  // This field will store the URL of the uploaded video
+    required: false,
+  },
   pages: [
     {
       page: Number,
