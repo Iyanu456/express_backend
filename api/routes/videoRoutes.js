@@ -96,7 +96,6 @@ router.post('/video-upload/:albumId', upload.single('file'), async (req, res) =>
           // Prepare the email content
           const emailSubject = 'New Video Uploaded';
           const emailContent = `
-          This is a test email<br><br>
               A new video has been uploaded <br><br>
               <b>Album name:</b> <b>${album.name}</b><br>
               <b>Uploader's Email:</b> ${userEmail}<br>
