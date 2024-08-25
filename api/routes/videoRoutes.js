@@ -6,6 +6,7 @@ const auth = require('../middlewares/authMiddleware');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const sendMail = require('../config/mail');
 
 const User = require("../models/user");
 const Album = require("../models/album");
@@ -35,9 +36,20 @@ router.post('/video-upload/:albumId', upload.single('file'), async (req, res) =>
     if (!token) return res.status(401).json({ error: 'Token is missing' });
 
     try {
-        // Verify the JWT token (optional if already verified by middleware)
+        
+
+        // Verify the JWT token and extract the user ID
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded;
+
+        const userId = decoded.sub;
+
+        // Find the user by ID to get their email
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        const userEmail = user.email;
 
         const { albumId } = req.params;
 
@@ -76,6 +88,25 @@ router.post('/video-upload/:albumId', upload.single('file'), async (req, res) =>
         // Update the album's uploadedVideo field with the new video URL
         album.uploadedVideo = videoUrl;
         await album.save();
+
+        // Find all admin users
+        const adminUsers = await User.find({ role: 'admin' });
+        const adminEmails = adminUsers.map(user => user.email);
+
+          // Prepare the email content
+          const emailSubject = 'New Video Uploaded';
+          const emailContent = `
+          This is a test email<br><br>
+              A new video has been uploaded <br><br>
+              <b>Album name:</b> <b>${album.name}</b><br>
+              <b>Uploader's Email:</b> ${userEmail}<br>
+              <b>Video Link:</b> <a href="${videoUrl}">${videoUrl}</a><br><br>
+              Please review it at your earliest convenience.
+          `;
+
+          await Promise.all(adminEmails.map(email => 
+            sendMail(email, emailSubject, emailContent)
+        ));
 
         // Respond with the updated album and the new video URL
         res.status(200).json({ album, videoUrl });
