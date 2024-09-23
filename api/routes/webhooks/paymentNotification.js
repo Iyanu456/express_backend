@@ -22,8 +22,8 @@ router.use(validateSecretKey);
 
 // Example GET route
 router.get('/', async (req, res) => {
-  const requestData = req.body;
-  const customData = requestData.customData || requestData;
+  const requestData = req.body || {};
+  const customData = requestData;
 
   console.log("Request received");
   console.log(`Data: ${JSON.stringify(requestData)}`);
@@ -40,33 +40,21 @@ router.get('/', async (req, res) => {
           <th style="text-align: left;">Value</th>
         </tr>
         <tr>
-          <td><b>Name</b></td>
-          <td>${customData.customer_first_name} ${customData.customer_last_name}</td>
-        </tr>
-        <tr>
-          <td><b>Customer Email</b></td>
-          <td>${customData.customer_email}</td>
-        </tr>
-        <tr>
-          <td><b>Transaction ID</b></td>
-          <td>${customData.transaction_id}</td>
-        </tr>
-        <tr>
-          <td><b>Amount Paid</b></td>
-          <td>${customData.amount_paid}</td>
-        </tr>
-        <tr>
-          <td><b>Customer ID</b></td>
-          <td>${customData.customer_id}</td>
-        </tr>
-        <tr>
-          <td><b>Number</b></td>
-          <td>${customData.number}</td>
-        </tr>
-        <tr>
-          <td><b>Payment Status</b></td>
-          <td>${customData.payment_status}</td>
-        </tr>
+        <td><b>Name</b></td>
+        <td>${customData.full_name}</td>
+      </tr>
+      <tr>
+        <td><b>Customer Email</b></td>
+        <td>${customData.email}</td>
+      </tr>
+      <tr>
+        <td><b>Amount Paid</b></td>
+        <td>${"$"}${customData.order.amount}</td>
+      </tr>
+      <tr>
+        <td><b>Number</b></td>
+        <td>${customData.phone}</td>
+      </tr>
       </table>`
     );
 
@@ -77,6 +65,7 @@ router.get('/', async (req, res) => {
       data: customData
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({
       message: "an error occurred",
       status: "failed",
@@ -87,8 +76,8 @@ router.get('/', async (req, res) => {
 
 // Example POST route
 router.post('/', async (req, res) => {
-  const requestData = req.body;
-  const customData = requestData.customData || requestData;
+  const requestData = req.body || {};
+  const customData = requestData;
 
   console.log("Request received");
   console.log(`Data: ${JSON.stringify(requestData)}`);
@@ -106,31 +95,19 @@ router.post('/', async (req, res) => {
         </tr>
         <tr>
           <td><b>Name</b></td>
-          <td>${customData.customer_first_name} ${customData.customer_last_name}</td>
+          <td>${customData.full_name}</td>
         </tr>
         <tr>
           <td><b>Customer Email</b></td>
-          <td>${customData.customer_email}</td>
-        </tr>
-        <tr>
-          <td><b>Transaction ID</b></td>
-          <td>${customData.transaction_id}</td>
+          <td>${customData.email}</td>
         </tr>
         <tr>
           <td><b>Amount Paid</b></td>
-          <td>${customData.amount_paid}</td>
-        </tr>
-        <tr>
-          <td><b>Customer ID</b></td>
-          <td>${customData.customer_id}</td>
+          <td>${customData.order.amount}$</td>
         </tr>
         <tr>
           <td><b>Number</b></td>
-          <td>${customData.number}</td>
-        </tr>
-        <tr>
-          <td><b>Payment Status</b></td>
-          <td>${customData.payment_status}</td>
+          <td>${customData.phone}</td>
         </tr>
       </table>`
     );
@@ -142,6 +119,7 @@ router.post('/', async (req, res) => {
       data: customData
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({
       message: "an error occurred",
       status: "failed",
