@@ -17,7 +17,6 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true
   },
   role: {
     type: String,
@@ -35,7 +34,28 @@ const userSchema = new mongoose.Schema({
   otpExpires: {
     type: Date,
     required: false
-  }
+  },
+  purchased: {
+    type: Boolean,
+    default: false,
+  },
+  paymentInfo: [
+    {
+      amountPaid: {
+        type: Number,
+        required: true
+      },
+      datePaid: {
+        type: Date,
+        default: Date.now,
+        required: true
+      },
+      orderId: {
+        type: String,
+        required: true
+      }
+    }
+  ]
 });
 
 const User = mongoose.models.User || mongoose.model('User', userSchema);
