@@ -89,7 +89,38 @@ router.post('/', async (req, res) => {
     await sendMail(
       email,
       `Payment notification`,
-      `<p>Thank you for your recent purchase, ${full_name}. Here are the details of your invoice:</p>
+      `<p>Hi ${first_name},</p>
+      <p>Thank you for your purchase! Here are the details of your invoice:</p>
+      <h2><b>Invoice Details</b></h2>
+      <table border="1" cellpadding="10" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+        <tr>
+          <th style="text-align: left;">Field</th>
+          <th style="text-align: left;">Value</th>
+        </tr>
+        <tr>
+          <td><b>Name</b></td>
+          <td>${full_name}</td>
+        </tr>
+        <tr>
+          <td><b>Email</b></td>
+          <td>${email}</td>
+        </tr>
+        <tr>
+          <td><b>Amount Paid</b></td>
+          <td>$${order.amount}</td>
+        </tr>
+        <tr>
+          <td><b>Phone</b></td>
+          <td>${requestData.phone}</td>
+        </tr>
+      </table>`
+    );
+
+    await sendMail(
+      "oyerindei13@gmail.com",
+      `Payment notification`,
+      `<p>Hi ${first_name},</p>
+      <p>Thank you for your purchase! Here are the details of your invoice:</p>
       <h2><b>Invoice Details</b></h2>
       <table border="1" cellpadding="10" cellspacing="0" style="border-collapse: collapse; width: 100%;">
         <tr>
