@@ -18,6 +18,12 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
   },
+  first_name: {
+    type: String,
+  },
+  last_name: {
+    type: String,
+  },
   role: {
     type: String,
     enum: ['guest', 'admin'],
