@@ -32,7 +32,7 @@ router.get('/', async (req, res) => {
     await sendMail(
       "oyerindei13@gmail.com",
       `Your Payment was Successful`,
-      `<p>Your payment was successful. Here are the details of your invoice:</p>
+      `<p>Thank you for your recent purchase Dear ${customData.first_name}. Here are the details of your invoice:</p>
       <h2><b>Invoice Details</b></h2>
       <table border="1" cellpadding="10" cellspacing="0" style="border-collapse: collapse; width: 100%;">
         <tr>
@@ -86,7 +86,7 @@ router.post('/', async (req, res) => {
     await sendMail(
       "oyerindei13@gmail.com",
       `Payment notification`,
-      `<p>Your payment was successful. Here are the details of your invoice:</p>
+      `<p>Thank you for your recent purchase Dear ${customData.first_name}. Here are the details of your invoice:</p>
       <h2><b>Invoice Details</b></h2>
       <table border="1" cellpadding="10" cellspacing="0" style="border-collapse: collapse; width: 100%;">
         <tr>
