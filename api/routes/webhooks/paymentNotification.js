@@ -4,6 +4,7 @@ const sendMail = require('../../config/mail');
 const User = require('../../models/user');
 const Purchase = require('../../models/purchase');
 const crypto = require('crypto');
+const bcrypt = require("bcryptjs");
 require('dotenv').config();  
 
 
@@ -36,16 +37,17 @@ router.post('/', async (req, res) => {
   try {
     // Check if the user exists
     let user = await User.findOne({ email });
-    let randomPassword = generateRandomPassword();  // Generate the random password for both cases
+    let randomPassword = generateRandomPassword(); 
+    const hashedPassword = bcrypt.hashSync(randomPassword, 10); // Generate the random password for both cases
 
     if (!user) {
       // If user doesn't exist, create a new account with a random password
       user = new User({
         email,
-        password: randomPassword,  // Save the random password
+        password: hashedPassword,  // Save the random password
         albums: [],
         purchased: true,
-        numberOfAlbums: 1,
+        numberOfPurchasedAlbums: order.quantity,
         paymentInfo: [{
           amountPaid: order.amount,
           datePaid: new Date(date_created),  // Use the payment date from the request body
@@ -68,7 +70,7 @@ router.post('/', async (req, res) => {
     } else {
       // If the user exists, update their payment information
       user.purchased = true;
-      user.numberOfAlbums += 1;
+      user.numberOfPurchasedAlbums += order.quantity;
       user.paymentInfo.push({
         amountPaid: order.amount,
         datePaid: new Date(date_created),

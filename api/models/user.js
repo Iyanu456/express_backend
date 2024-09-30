@@ -33,6 +33,7 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Album'
   }],
+  numberOfPurchasedAlbums: { type: Number, default: 0 },
   otp: {
     type: String,
     required: false
