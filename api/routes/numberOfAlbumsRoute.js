@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../../models/user'); // Import your User model
+const User = require('../models/user'); // Import your User model
 
 // Route to fetch the number of purchased albums based on the user's email
-router.get('/purchased-albums', async (req, res) => {
+router.get('/', async (req, res) => {
   const { email } = req.query; // Assume email is passed as a query parameter
 
   try {
@@ -22,7 +22,7 @@ router.get('/purchased-albums', async (req, res) => {
     // Respond with the number of purchased albums
     res.status(200).json({
       message: `User found`,
-      numberOfAlbums: user.numberOfAlbums, // Fetch the number of albums
+      numberOfPurchasedAlbums: user.numberOfPurchasedAlbums, // Fetch the number of albums
       ok: true,
     });
   } catch (error) {

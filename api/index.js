@@ -24,6 +24,7 @@ const captionRoutes = require ('./routes/captionRoute');
 const albumRoutes = require('./routes/albumRoutes');
 const videoRoutes = require('./routes/videoRoutes');
 const paymentWebhook = require('./routes/webhooks/paymentNotification');
+const numberOfAlbumsRoute = require ('./routes/numberOfAlbumsRoute');
 
 
 
@@ -93,6 +94,7 @@ app.use(captionRoutes);
 app.use(albumRoutes);
 app.use('/api', videoRoutes);
 app.use('/api/webhooks/payment_notification', paymentWebhook);
+app.use('/api/purchased_albums', numberOfAlbumsRoute)
 
 
 app.use('/*', (req, res) => {
