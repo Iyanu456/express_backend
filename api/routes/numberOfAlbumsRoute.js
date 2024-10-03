@@ -1,18 +1,22 @@
 const express = require('express');
 const router = express.Router();
+const auth = require('../middlewares/authMiddleware');
 const User = require('../models/user'); // Import your User model
 
 // Route to fetch the number of purchased albums based on the user's email
-router.get('/', async (req, res) => {
-  const { email } = req.query; // Assume email is passed as a query parameter
+router.get('/', auth, async (req, res) => {
+  //const { user_id } = req.query; // Assume email is passed as a query parameter
+  
 
   try {
-    // Find the user by their email
-    const user = await User.findOne({ email });
+    // Find the user by their user_id
+    //const user = await User.findOne({ _id: user_id });
+    const user = req.user;
 
     // If no user is found
     if (!user) {
-      return res.status(404).json({
+      return res.status(200).json({
+        user: user,
         message: 'User not found',
         status: 'failed',
         ok: false,

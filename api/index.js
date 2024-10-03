@@ -82,7 +82,7 @@ mongoose.connect(process.env.DATABASE_URI)
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-//routes
+//routesss
 app.use('/api', userRoutes);
 app.use('/local', uploadRoutes);
 app.use('/api', protectedRoutes);
