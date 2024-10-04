@@ -57,7 +57,7 @@ router.get('/album/:albumid', async (req, res) => {
       const albumList = user.albums.map(album => ({
         albumId: album._id,
         albumName: album.name,
-        thumbnail: album.uploadedImages[0]
+        thumbnail: album.uploadedImages.length > 0 ? album.uploadedImages[0] : null
       }));
   
       // Return the list of albums
