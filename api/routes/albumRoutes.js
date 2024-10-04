@@ -56,7 +56,8 @@ router.get('/album/:albumid', async (req, res) => {
       // Map the albums to only include name and _id (albumId)
       const albumList = user.albums.map(album => ({
         albumId: album._id,
-        albumName: album.name
+        albumName: album.name,
+        thumbnail: album.uploadedImages[0]
       }));
   
       // Return the list of albums
