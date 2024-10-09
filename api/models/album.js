@@ -25,6 +25,10 @@ const AlbumSchema = new mongoose.Schema({
     type: String,  // This field will store the URL of the uploaded video
     required: false,
   },
+  thumbnail: {  // New field for the thumbnail URL
+    type: String,
+    required: false,  // Make this optional; it can be set later
+  },
   pages: [
     {
       page: Number,

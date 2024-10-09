@@ -8,6 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const { promisify } = require('util');
 const convert = require('heic-convert');
+const sharp = require('sharp');
 
 // Import your User and Album models
 const User = require('../models/user');
@@ -33,19 +34,22 @@ const localStorage = multer.diskStorage({
 });
 
 
-const upload = multer({ storage: localStorage });
+//const upload = multer({ storage: localStorage });
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 const baseUrl = process.env.IMAGE_BASE_URL;
 
 // HEIC to JPEG conversion function
-async function heicToJpeg(inputPath, outputPath) {
-  const inputBuffer = await promisify(fs.readFile)(inputPath);
+async function heicToJpeg(buffer) {
   const outputBuffer = await convert({
-    buffer: inputBuffer,
+    buffer: buffer,
     format: 'JPEG',
-    quality: 1, // You can adjust the quality (0 to 1)
+    quality: 1, // Adjust as needed
   });
-  await promisify(fs.writeFile)(outputPath, outputBuffer);
+  return outputBuffer;
 }
+
 
 // Upload Route
 router.post('/upload', upload.array('files', 70), async (req, res) => {
@@ -87,8 +91,9 @@ router.post('/upload', upload.array('files', 70), async (req, res) => {
       userId: user._id,
       name: uniqueAlbumName,
       yearsAlive: yearsAlive,
-      fullNameOfPerson: fullNameOfPerson, 
+      fullNameOfPerson: fullNameOfPerson,
       uploadedImages: [],
+      thumbnail: '', // Initialize thumbnail field
       pages: [{
         page: 1,
         mainPreviewImages: [],
@@ -100,27 +105,71 @@ router.post('/upload', upload.array('files', 70), async (req, res) => {
       }],
     });
 
-    for (let file of req.files) {
-      let finalFilePath = file.path;
+    // Process each uploaded file
+    for (let i = 0; i < req.files.length; i++) {
+      const file = req.files[i];
+      let finalBuffer = file.buffer;
+      let fileExtension = path.extname(file.originalname).toLowerCase();
 
-      if (file.mimetype === 'image/heic' || path.extname(file.originalname).toLowerCase() === '.heic') {
-        const outputFileName = `${path.parse(file.filename).name}.jpg`;
-        const outputPath = path.join(path.dirname(file.path), outputFileName);
-
-        await heicToJpeg(file.path, outputPath);
-
-        // Delete the original HEIC file after conversion
-        fs.unlinkSync(file.path);
-
-        finalFilePath = outputPath;
+      // Convert HEIC to JPEG if necessary
+      if (file.mimetype === 'image/heic' || fileExtension === '.heic') {
+        finalBuffer = await heicToJpeg(finalBuffer); // Pass buffer instead of path
+        fileExtension = '.jpg'; // Update file extension after conversion
       }
 
-      const imageUrl = `${baseUrl}/images/${path.basename(finalFilePath)}`;
+      // Get metadata to determine the aspect ratio
+      const metadata = await sharp(finalBuffer).metadata();
+
+      // Define resizing logic based on the aspect ratio
+      let resizeOptions = {};
+      if (metadata.width > metadata.height) {
+        // Landscape orientation
+        resizeOptions = { width: 1920 }; // Resize by width
+      } else {
+        // Portrait orientation
+        resizeOptions = { height: 1440 }; // Resize by height
+      }
+
+      // Compress the image using Sharp
+      const compressedImageBuffer = await sharp(finalBuffer)
+        .resize(resizeOptions) // Use the defined resize options
+        .toBuffer(); // Get the compressed image as a buffer
+
+      // Generate a unique identifier for the file name
+      const uniqueIdentifier = Date.now() + Math.floor(Math.random() * 1000);
+      const outputFileName = `${path.parse(file.originalname).name}-${uniqueIdentifier}${fileExtension}`;
+      const outputFilePath = path.join(__dirname, '..', '..', 'public', 'images', outputFileName);
+
+      // Save the compressed image to disk
+      fs.writeFileSync(outputFilePath, compressedImageBuffer);
+
+      // Create the URL for the compressed image
+      const imageUrl = `${baseUrl}/images/${outputFileName}`;
+      
+      // Add the compressed image URL to the album's uploadedImages array
       newAlbum.uploadedImages.push(imageUrl);
+
+      // Create a thumbnail only for the first image
+      if (i === 0) {
+        const thumbnailBuffer = await sharp(finalBuffer)
+          .resize({ width: 320, height: 240, fit: 'inside' }) // Maintain aspect ratio
+          .jpeg({ quality: 50 }) // Adjust quality for better compression
+          .toBuffer();
+
+        const thumbnailFileName = `thumbnail-${outputFileName}`;
+        const thumbnailFilePath = path.join(__dirname, '..', '..', 'public', 'thumbnails', thumbnailFileName);
+
+        // Save the thumbnail to disk
+        fs.writeFileSync(thumbnailFilePath, thumbnailBuffer);
+
+        // Create the URL for the thumbnail image
+        newAlbum.thumbnail = `${baseUrl}/thumbnails/${thumbnailFileName}`;
+      }
     }
 
     await newAlbum.save();
 
+    // Associate the album with the user
     user.albums.push(newAlbum._id);
     await user.save();
 
@@ -128,18 +177,20 @@ router.post('/upload', upload.array('files', 70), async (req, res) => {
       userId: userId,
       albumName: uniqueAlbumName,
       albumId: newAlbum._id,
-      message: 'Files uploaded successfully',
-      files: req.files,
+      message: 'Files uploaded and compressed successfully',
       status: 'success',
       ok: true,
+      thumbnailUrl: newAlbum.thumbnail, // Return the thumbnail URL in the response
     });
   } catch (error) {
-    console.error('Error occurred:', error);
+    console.error('Error occurred during upload and compression:', error);
     res.status(500).json({ error: 'Something went wrong' });
   }
 });
 
-//Album update route
+
+
+
 
 router.post('/update/:albumId', upload.array('files', 70), async (req, res) => {
   const authHeader = req.headers['authorization'];
@@ -155,7 +206,7 @@ router.post('/update/:albumId', upload.array('files', 70), async (req, res) => {
     return res.status(401).json({ error: 'Token is missing' });
   }
 
-  console.log('Received /local/update request');
+  console.log('Received /update request');
   console.log('Request body:', req.body);
   console.log('Uploaded files:', req.files);
 
@@ -187,22 +238,70 @@ router.post('/update/:albumId', upload.array('files', 70), async (req, res) => {
       return res.status(404).json({ message: 'Album not found' });
     }
 
-    // Store URLs of the uploaded images in the uploadedImages array
-    req.files.forEach((file) => {
-      const imageUrl = `${baseUrl}/images/${file.filename}`;
-      album.uploadedImages.push(imageUrl);
-    });
+    // Initialize an array to store unique image URLs
+const imageUrlsSet = new Set();
 
-    // Save the updated album to the database
-    console.log('Saving updated album to the database');
-    await album.save();
+// Process each uploaded file
+for (let file of req.files) {
+  let finalBuffer = file.buffer;
+  let fileExtension = path.extname(file.originalname).toLowerCase();
+
+  // Convert HEIC to JPEG if necessary
+  if (file.mimetype === 'image/heic' || fileExtension === '.heic') {
+    finalBuffer = await heicToJpeg(finalBuffer); // Pass buffer directly
+    fileExtension = '.jpg'; // Update file extension after conversion
+  }
+
+  // Get metadata to determine the aspect ratio
+  const metadata = await sharp(finalBuffer).metadata();
+
+  // Define resizing logic based on the aspect ratio
+  let resizeOptions = {};
+  if (metadata.width > metadata.height) {
+    // Landscape orientation
+    resizeOptions = { width: 1920 }; // Resize by width
+  } else {
+    // Portrait orientation
+    resizeOptions = { height: 1440 }; // Resize by height
+  }
+
+  // Compress the image using Sharp
+  const compressedImageBuffer = await sharp(finalBuffer)
+    .resize(resizeOptions) // Use the defined resize options
+    .toBuffer(); // Get the compressed image as a buffer
+
+  // Define the path for saving the compressed image
+  const outputFileName = path.parse(file.originalname).name + fileExtension;
+  const outputFilePath = path.join(__dirname, '..', '..', 'public', 'images', outputFileName);
+
+  // Save the compressed image to disk
+  fs.writeFileSync(outputFilePath, compressedImageBuffer);
+
+  // Create the URL for the compressed image
+  const imageUrl = `${baseUrl}/images/${outputFileName}`;
+  console.log('Image URL:', imageUrl); // Log the image URL to check its value
+
+  // Add the compressed image URL to the album's uploadedImages array
+  imageUrlsSet.add(imageUrl); // Use Set to avoid duplicates
+}
+
+// Add unique image URLs to the album
+album.uploadedImages.push(...Array.from(imageUrlsSet));
+
+// Save the updated album to the database
+console.log('Saving updated album to the database');
+await album.save();
+
+// Get the current image URLs in the album
+const currentImageUrls = album.uploadedImages;
 
     res.status(200).json({
       userId: userId,
       albumName: album.name,
       albumId: album._id,
       message: 'Files uploaded successfully',
-      files: req.files,
+      //files: req.files,
+      currentImageUrls, // Include the current image URLs in the response
       status: 'success',
       ok: true,
     });
@@ -211,5 +310,6 @@ router.post('/update/:albumId', upload.array('files', 70), async (req, res) => {
     res.status(500).json({ error: 'Something went wrong' });
   }
 });
+
 
 module.exports = router;

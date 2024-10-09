@@ -69,6 +69,7 @@ const root = require('path').join(__dirname, 'public');
 
 app.use(express.static(root));
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
+app.use('/thumbnails', express.static(path.join(__dirname, '../public/thumbnails')));
 app.use('/video-uploads', express.static(path.join(__dirname, '../public/video-uploads')));
 app.use(bodyParser.json({ limit: '250mb' }));
 app.use(bodyParser.urlencoded({ limit: '250mb', extended: true }));

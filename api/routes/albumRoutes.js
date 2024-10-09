@@ -43,37 +43,37 @@ router.get('/album/:albumid', async (req, res) => {
 
 
   router.get('/albums/:userId', async (req, res) => {
-  const { userId } = req.params;
-
-  try {
-    // Find the user by userId and populate the albums, including 'name' and 'uploadedImages'
-    const user = await User.findById(userId).populate('albums', 'name uploadedImages');
-
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    const { userId } = req.params;
+  
+    try {
+      // Find the user by userId and populate the albums, including 'name' and 'thumbnail'
+      const user = await User.findById(userId).populate('albums', 'name thumbnail');
+  
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      // Map the albums to only include name, _id (albumId), and thumbnail
+      const albumList = user.albums.map(album => ({
+        albumId: album._id,
+        albumName: album.name,
+        thumbnail: album.thumbnail || null, // Ensure null if thumbnail does not exist
+      }));
+  
+      // Return the list of albums
+      res.status(200).json({
+        email: user.email,
+        role: user.role,
+        userId: userId,
+        albums: albumList,
+        status: 'success',
+        ok: true,
+      });
+    } catch (error) {
+      console.error('Error occurred:', error);
+      res.status(500).json({ error: `${error}` });
     }
-
-    // Map the albums to only include name and _id (albumId), with a check for uploadedImages
-    const albumList = user.albums.map(album => ({
-      albumId: album._id,
-      albumName: album.name,
-      thumbnail: album.uploadedImages && album.uploadedImages.length > 0 ? album.uploadedImages[0] : null
-    }));
-
-    // Return the list of albums
-    res.status(200).json({
-      email: user.email,
-      role: user.role,
-      userId: userId,
-      albums: albumList,
-      status: 'success',
-      ok: true
-    });
-  } catch (error) {
-    console.error('Error occurred:', error);
-    res.status(500).json({ error: `${error}` });
-  }
-});
+  });
   
 
   
